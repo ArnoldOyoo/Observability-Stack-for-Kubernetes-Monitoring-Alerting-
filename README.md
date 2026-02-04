@@ -5,7 +5,7 @@
 
 Kubernetes observability platform using Prometheus, Grafana, Alertmanager, node-exporter, kube-state-metrics, and a custom metrics app. Deployed via Helm into an AWS-hosted Kubernetes cluster created by Terraform.
 
-## Repository layout
+## layout
 
 - `terraform-cluster/` - EKS cluster provisioning (VPC + EKS).
 - `helm-values/` - Helm values for kube-prometheus-stack.
