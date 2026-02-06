@@ -5,70 +5,58 @@ Kubernetes observability platform using Prometheus, Grafana, Alertmanager, node-
 ```mermaid
 flowchart LR
   %% =====================
-  %% External Actors
+  %% People
   %% =====================
-  users((👤 Users)):::users --> app
+  User[👤 User<br/>Views dashboards & alerts]:::person
 
   %% =====================
-  %% Core App Flow
+  %% System Boundary
   %% =====================
-  app[📊 Custom Metrics App]:::app --> svc
-  svc[🔌 Service]:::svc -->| /metrics | prom
-
-  %% =====================
-  %% Observability Stack
-  %% =====================
-  prom[📈 Prometheus]:::prom --> am
-  prom --> graf
-  prom --> ne
-  prom --> ksm
-
-  am[🚨 Alertmanager]:::alert --> notify
-  graf[📉 Grafana]:::graf --> dashboards
-
-  notify[📬 Slack / Email / Pager]:::notify
-  dashboards[🧩 Custom Dashboards]:::dash
-
-  ne[🖥️ node-exporter]:::exporter
-  ksm[☸️ kube-state-metrics]:::exporter
-
-  %% =====================
-  %% Infrastructure Layer
-  %% =====================
-  terraform[🏗️ Terraform]:::iac --> EKS
-  helm[⛵ Helm]:::iac --> prom
-  helm --> graf
-  helm --> am
-
-  %% =====================
-  %% EKS Cluster
-  %% =====================
-  subgraph EKS["☸️ Amazon EKS Cluster"]
+  subgraph System["📊 Observability Platform (AWS EKS)"]
     direction LR
-    app
-    svc
-    prom
-    am
-    graf
-    ne
-    ksm
+
+    %% Containers
+    App[📦 Custom Metrics App<br/><small>Exposes business metrics</small>]:::container
+    Svc[🔌 Kubernetes Service<br/><small>Metrics endpoint</small>]:::container
+
+    Prom[📈 Prometheus<br/><small>Metrics scraping & storage</small>]:::container
+    AM[🚨 Alertmanager<br/><small>Alert routing & grouping</small>]:::container
+    Graf[📉 Grafana<br/><small>Visualization & dashboards</small>]:::container
+
+    NE[🖥️ node-exporter<br/><small>Node-level metrics</small>]:::container
+    KSM[☸️ kube-state-metrics<br/><small>Kubernetes object metrics</small>]:::container
   end
+
+  %% =====================
+  %% External Systems
+  %% =====================
+  Notify[📬 Notification Systems<br/><small>Slack / Email / PagerDuty</small>]:::external
+
+  %% =====================
+  %% Relationships
+  %% =====================
+  User -->|Views dashboards| Graf
+  User -->|Receives alerts| Notify
+
+  App -->|Exposes metrics| Svc
+  Svc -->|Scraped via /metrics| Prom
+
+  Prom -->|Scrapes metrics| NE
+  Prom -->|Scrapes metrics| KSM
+  Prom -->|Evaluates rules| AM
+  Prom -->|Queries metrics| Graf
+
+  AM -->|Sends alerts| Notify
 
   %% =====================
   %% Styling
   %% =====================
-  classDef users fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
-  classDef app fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
-  classDef svc fill:#F1F8E9,stroke:#7CB342
-  classDef prom fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px
-  classDef alert fill:#FDECEA,stroke:#E53935,stroke-width:2px
-  classDef graf fill:#E1F5FE,stroke:#039BE5,stroke-width:2px
-  classDef exporter fill:#F3E5F5,stroke:#8E24AA
-  classDef notify fill:#FFEBEE,stroke:#C62828
-  classDef dash fill:#E0F2F1,stroke:#00897B
-  classDef iac fill:#ECEFF1,stroke:#455A64,stroke-dasharray: 5 5
+  classDef person fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px
+  classDef container fill:#FFFFFF,stroke:#424242,stroke-width:1.5px
+  classDef external fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px
 
-  style EKS fill:#FAFAFA,stroke:#90A4AE,stroke-width:2px
+  style System fill:#FAFAFA,stroke:#90A4AE,stroke-width:2px
+
 
 ```
 
